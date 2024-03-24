@@ -1,11 +1,13 @@
 package test;
 
 public class Mutants {
+	private int numMutant;
 	
-	public Mutants() {
+	public Mutants(int numMutant) {
+		this.numMutant = numMutant;
 	}
 	
-	public char[] anagrammeMutants(char[] anagramme, int numMutant) {
+	public char[] anagrammeMutants(char[] anagramme) {
 		switch (numMutant) {
 		case 1: {
 			anagramme = mutant1(anagramme);

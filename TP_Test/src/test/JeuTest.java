@@ -1,31 +1,46 @@
 package test;
 
-import java.io.BufferedReader;
+
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.NoSuchElementException;
+import java.util.Scanner;
 
 import main.Anagramme;
 
 public class JeuTest {
-	private String[] cas;
-	private String[] oracles;
-	private int nombreCas;
+	private ArrayList<String> cas;
+	private ArrayList<String> oracles;
 	
 	public JeuTest() {
+		cas = new ArrayList<>();
+		oracles = new ArrayList<>();
 		lectureFichier();
 	}
 	
 	public void lectureFichier() {
+		Path currentDirectoryPath = FileSystems.getDefault().getPath("");
+		String currentDirectoryName = currentDirectoryPath.toAbsolutePath().toString();
 		try {
-			FileReader fileReader = new FileReader("C:\\Users\\Ninon\\Desktop\\TP\\workspace\\TP_Test\\src\\test\\valeurs_test.txt");
-			BufferedReader reader = new BufferedReader(fileReader);
-			String line = reader.readLine();	
-			cas = line.split(";");
-			line = reader.readLine();
-			oracles = line.split(";");
-			nombreCas = cas.length;
-			reader.close();
+			FileReader fileReader = new FileReader(currentDirectoryName + "/src/valeurs_test.txt");
+			Scanner scanner = new Scanner(fileReader);
+			String line = scanner.nextLine();
+			String[] lineSplit;
+			while (line!=null) {
+				lineSplit = line.split(";");
+				cas.add(lineSplit[0]);
+				oracles.add(lineSplit[1]);
+				try {
+					line = scanner.nextLine();
+				} catch (NoSuchElementException e) {
+					line = null;
+				} 
+			}
+			scanner.close();
 			fileReader.close();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -33,37 +48,44 @@ public class JeuTest {
 	}
 	
 	public void testAnagaramme() {
-		Anagramme anagramme = new Anagramme();
-		for (int i = 0; i<nombreCas;i++) {
-			char[] c1 = cas[i].toCharArray();
-			char[] oracle1 = oracles[i].toCharArray();
-			char[] res1 = anagramme.constructionAnagramme(c1);
-			if (Arrays.equals(oracle1, res1)) {
-				System.out.println("test" + (i+1) + " pass");
+		System.out.println("Tests fonctionnels :");
+		Anagramme anagramme = new Anagramme(new Scanner(System.in));
+		for (int i = 0; i<cas.size();i++) {
+			char[] c = cas.get(i).toCharArray();
+			char[] oracle = oracles.get(i).toCharArray();
+			char[] res = anagramme.constructionAnagramme(c);
+			if (Arrays.equals(oracle, res)) {
+				System.out.println("Test " + (i+1) + " passed -> \"" + cas.get(i) + "\" : \"" + String.copyValueOf(oracle) + "\"");
 			}else {
-				System.out.println("test" + (i+1) + " fail");
+				System.out.println("Test " + (i+1) + " failed -> \"" + cas.get(i) + "\" expected \"" + String.copyValueOf(oracle) + "\" but was \"" + String.copyValueOf(res) + "\"");
 			}
 		}
 	}
 	
 	public void testMutants() {
-		Mutants mutants = new Mutants();
-		for (int j = 1; j<=7;j++) {
+		System.out.println("\nTests de mutation :");
+		Mutants mutants;
+		for (int j = 1; j<=4;j++) {
+			mutants = new Mutants(j);
 			boolean survived = true;
-			for (int i = 0; i<nombreCas && survived;i++) {
-				char[] c1 = cas[i].toCharArray();
-				char[] oracle1 = oracles[i].toCharArray();
+			for (int i = 0; i<cas.size() && survived;i++) {
+				char[] c = cas.get(i).toCharArray();
+				char[] oracle = oracles.get(i).toCharArray();
 				try {
-					char[] res1 = mutants.anagrammeMutants(c1, j);
-					survived = Arrays.equals(oracle1, res1);
+					char[] res = mutants.anagrammeMutants(c);
+					survived = Arrays.equals(oracle, res);
+					if (!survived) {
+						System.out.println("\tTest " + (i+1) + " failed -> Wrong result");
+					}
 				} catch (Exception e) {
 					survived = false;
+					System.out.println("\tTest " + (i+1) + " failed -> Error");
 				}
 			}
 			if(survived) {
-				System.out.println("Mutant" + j + " survived");
+				System.out.println("\tAll tests passed\nMutant " + j + " survived");
 			}else {
-				System.out.println("Mutant" + j + " killed");
+				System.out.println("Mutant " + j + " killed");
 			}
 		}
 	}

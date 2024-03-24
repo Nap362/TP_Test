@@ -1,7 +1,20 @@
 package main;
 
+import java.util.Scanner;
+
 public class Anagramme {
-	public Anagramme() {}
+	private Scanner scanner;
+	
+	public Anagramme(Scanner scanner) {
+		this.scanner = scanner;
+	}
+	
+	public char[] recupererEntree() {
+		System.out.println("Entrez un mot :");
+		String entree = scanner.next();
+		scanner.close();
+		return entree.toCharArray();
+	}
 	
 	public char[] constructionAnagramme(char[] anagramme) {
 		int taille_anagramme = anagramme.length;
